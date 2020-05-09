@@ -1,6 +1,6 @@
 # async-rust-example
 
-Example of async programming in Rust, written for [this blog post](TODO).
+Example of async programming in Rust, written for [this blog post](http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/#en).
 
 ## Server
 
