@@ -1,10 +1,12 @@
+use futures_util::io::AsyncReadExt;
 use futures::stream::StreamExt;
-use tokio::net::TcpListener;
+use async_std::net::TcpListener;
+use std::time::Duration;
 
-#[tokio::main]
+#[async_std::main]
 async fn main() {
     let addr = "127.0.0.1:6142";
-    let mut listener = TcpListener::bind(addr).await.unwrap();
+    let listener = TcpListener::bind(addr).await.unwrap();
 
     let server = {
         async move {
@@ -12,11 +14,11 @@ async fn main() {
             while let Some(conn) = incoming.next().await {
                 match conn {
                     Err(e) => eprintln!("accept failed = {:?}", e),
-                    Ok(mut sock) => {
-                        tokio::spawn(async move {
+                    Ok(sock) => {
+                        async_std::task::spawn(async move {
                             let (mut reader, mut writer) = sock.split();
-                            tokio::time::delay_for(tokio::time::Duration::from_secs(8)).await;
-                            match tokio::io::copy(&mut reader, &mut writer).await {
+                            async_std::task::sleep(Duration::from_secs(8)).await;
+                            match async_std::io::copy(&mut reader, &mut writer).await {
                                 Ok(amt) => {
                                     println!("wrote {} bytes", amt);
                                 }
