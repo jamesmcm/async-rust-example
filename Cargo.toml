@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "server",
+    "client_async",
+    "client_synchronous",
+    "client_synchronous_parallel",
+]
