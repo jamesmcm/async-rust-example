@@ -1,4 +1,4 @@
-# async_blog_example
+# async-rust-example
 
 Example of async programming in Rust, written for [this blog post](TODO).
 
