@@ -6,7 +6,6 @@ use std::error::Error;
 use std::thread::sleep;
 use std::time::Instant;
 #[allow(unused_imports)]
-use tokio::join;
 use tokio::net::TcpStream;
 use tokio::prelude::*;
 
@@ -26,33 +25,40 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     // task("task3", now.clone()).await?;
 
     // Asynchronous single-thread
-    // let mut futs = FuturesUnordered::new();
-
-    // futs.push(task("task1", now.clone()));
-    // futs.push(task("task2", now.clone()));
-    // futs.push(task("task3", now.clone()));
-
-    // while let Some(_handled) = futs.next().await {}
+    /*
+    let mut futs = FuturesUnordered::new();
+    futs.push(task("task1", now.clone()));
+    futs.push(task("task2", now.clone()));
+    futs.push(task("task3", now.clone()));
+    while let Some(handled) = futs.next().await {
+        handled?;
+    }
+    Ok(())
+    */
 
     // Asynchronous multi-threaded
-    // let mut futs = FuturesUnordered::new();
-    // futs.push(tokio::spawn(task("task1", now.clone())));
-    // futs.push(tokio::spawn(task("task2", now.clone())));
-    // futs.push(tokio::spawn(task("task3", now.clone())));
-    // while let Some(_handled) = futs.next().await {}
+    /*
+    let mut futs = FuturesUnordered::new();
+    futs.push(tokio::spawn(task("task1", now.clone())));
+    futs.push(tokio::spawn(task("task2", now.clone())));
+    futs.push(tokio::spawn(task("task3", now.clone())));
+    while let Some(handled) = futs.next().await {
+        handled??;
+    }
+    Ok(())
+    */
 
     // Equivalent to FuturesUnordered, but without allocation, less wieldy for many futures
-    match join!(
+    match futures::future::join3(
         tokio::spawn(task("task1", now.clone())),
         tokio::spawn(task("task2", now.clone())),
         tokio::spawn(task("task3", now.clone()))
-    ) {
+    ).await {
         (x, y, z) => {
             // dbg!("{:?}", (&x, &y, &z));
-            (x.ok(), y.ok(), z.ok())
+            x??; y??; z?
         }
-    };
-    Ok(())
+    }
 }
 
 async fn task(
