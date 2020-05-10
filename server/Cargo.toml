@@ -8,5 +8,10 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "0.2.20", features = ["full"] }
 futures = "0.3.4"
+futures-util = "0.3.5"
+
+[dependencies.async-std]
+version = "1.6.0-beta.1"
+features = ["unstable", "attributes"]
+
