@@ -5,9 +5,9 @@ use futures::stream::StreamExt;
 use std::error::Error;
 use std::thread::sleep;
 use std::time::Instant;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 #[allow(unused_imports)]
 use tokio::net::TcpStream;
-use tokio::prelude::*;
 
 // Synchronous: (2+8+4) * 3 = 42 secs
 // Async single-thread: 2 + 8 + (3*4) = 22 secs
@@ -52,11 +52,15 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     match futures::future::join3(
         tokio::spawn(task("task1", now.clone())),
         tokio::spawn(task("task2", now.clone())),
-        tokio::spawn(task("task3", now.clone()))
-    ).await {
+        tokio::spawn(task("task3", now.clone())),
+    )
+    .await
+    {
         (x, y, z) => {
             // dbg!("{:?}", (&x, &y, &z));
-            x??; y??; z?
+            x??;
+            y??;
+            z?
         }
     }
 }
@@ -72,7 +76,7 @@ async fn task(
         label,
         now.elapsed(),
     );
-    tokio::time::delay_for(tokio::time::Duration::from_secs(2)).await;
+    tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
     // Write to server - server will echo this back to us with 8 second delay
     let mut stream = TcpStream::connect("127.0.0.1:6142").await?;
@@ -87,7 +91,7 @@ async fn task(
     // Read 5 chars we expect (to avoid dealing with EOF, etc.)
     let mut buffer = [0; 5];
     stream.read_exact(&mut buffer).await?;
-    stream.shutdown(std::net::Shutdown::Both)?;
+    stream.shutdown().await?;
     println!(
         "OS Thread {:?} - {} read: {:?}",
         std::thread::current().id(),
